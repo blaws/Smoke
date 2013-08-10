@@ -13,6 +13,8 @@ int squaresize = 16;
 GLubyte square[16][16][2];
 GLuint textureObj;
 std::vector<int> arrayOfSquares;
+int smokeAmt=5,varAmt=0;  // control amount and placement of smoke
+int wind=0;
 
 void makeSquare(){
   int i,j,k,coeffs[6];
@@ -89,9 +91,9 @@ void display(){
 
 void increment(int t){
   int i,j;
-  while(rand()%6){  // add square
-    arrayOfSquares.push_back(wsize/2/*+rand()%50-25*/);  // X
-    arrayOfSquares.push_back(wsize/4/*+rand()%50-25*/);  // Y
+  while(rand()%(smokeAmt+1)){  // add square
+    arrayOfSquares.push_back(wsize/2+rand()%(2*varAmt+1)-varAmt);  // X
+    arrayOfSquares.push_back(wsize/4+rand()%(2*varAmt+1)-varAmt);  // Y
     arrayOfSquares.push_back(rand()%5-2);  // X-vel
     arrayOfSquares.push_back(rand()%3);  // Y-vel
     arrayOfSquares.push_back(rand()%360);  // rotation
@@ -114,8 +116,9 @@ void increment(int t){
     arrayOfSquares[i+1] += arrayOfSquares[i+3];
     arrayOfSquares[i+4] += arrayOfSquares[i+5];
 
-    // accelerate upward
+    // accelerate
     if(rand()%5==0) arrayOfSquares[i+3]++;
+    if(wind && rand()%(abs(wind)+1) && rand()%5==0) arrayOfSquares[i+2]+=(wind)/abs(wind);
 
     // add to timer
     arrayOfSquares[i+6]++;
@@ -130,6 +133,9 @@ void reset(){
   arrayOfSquares.clear();
   makeSquare();
   paused = false;
+  wind = 0;
+  smokeAmt = 5;
+  varAmt = 0;
 }
 
 void keyboard(unsigned char key,int x,int y){
@@ -156,6 +162,25 @@ void keyboard(unsigned char key,int x,int y){
   }
 }
 
+void keyboardSpecials(int key,int x,int y){
+  switch(key){
+  case GLUT_KEY_UP:
+    if(smokeAmt<10) smokeAmt++;
+    break;
+  case GLUT_KEY_DOWN:
+    if(smokeAmt>0) smokeAmt--;
+    break;
+  case GLUT_KEY_LEFT:
+    if(wind>-10) wind--;
+    break;
+  case GLUT_KEY_RIGHT:
+    if(wind<10) wind++;
+    break;
+  default:
+    break;
+  }
+}
+
 int main(int argc,char* argv[]){
   srand(time(NULL));
 
@@ -174,6 +199,7 @@ int main(int argc,char* argv[]){
   glutReshapeFunc(reshape);
   glutDisplayFunc(display);
   glutKeyboardFunc(keyboard);
+  glutSpecialFunc(keyboardSpecials);
 
   reset();
   glutTimerFunc(50,increment,0);
