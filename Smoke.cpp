@@ -12,10 +12,11 @@ bool paused = false;
 int squaresize = 16;
 GLubyte square[16][16][2];
 GLuint textureObj;
-std::vector<int> arrayOfSquares;
+std::vector<int> arrayOfSquares;  // contains x- and y-coords, x- and y- velocity, current rotation, rotation velocity, and frames since creation
 int smokeAmt=5,varAmt=0;  // control amount and placement of smoke
 int wind=0;
 
+// creates random, smoothed noise texture to use as the basis of the smoke
 void makeSquare(){
   int i,j,k,coeffs[6];
   double offsets[6];
@@ -89,6 +90,7 @@ void display(){
   glutSwapBuffers();
 }
 
+// runs every 50 ms; moves the smoke squares
 void increment(int t){
   int i,j;
   while(rand()%(smokeAmt+1)){  // add square
